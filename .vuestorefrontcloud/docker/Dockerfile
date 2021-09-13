@@ -13,7 +13,7 @@ RUN npm install -g npm-cli-login \
 
 WORKDIR /var/www
 
-COPY generated-demo .
+COPY . .
 
 RUN yarn install --network-concurrency 1 && yarn build && yarn cache clean --all
 
