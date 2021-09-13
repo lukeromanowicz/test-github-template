@@ -1,0 +1,61 @@
+<template>
+  <SfCarousel v-if="!loading" class="product-carousel">
+    <SfCarouselItem v-for="(product, i) in list" :key="i">
+      <SfProductCard
+        data-cy="home-url_product"
+        :title="productGetters.getName(product)"
+        :image="product.images[0].url"
+        :regular-price="$n(productGetters.getFormattedPrice(productGetters.getPrice(product).regular), 'currency')"
+        :special-price="$n(productGetters.getFormattedPrice(productGetters.getPrice(product).special), 'currency')"
+        :max-rating="5"
+        :score-rating="3.5"
+        :show-add-to-cart-button="true"
+        :is-on-wishlist="product.isOnWishlist"
+        :link="`/product?id=${product._id}`"
+        class="product-card"
+      />
+    </SfCarouselItem>
+  </SfCarousel>
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import { SfCarousel, SfProductCard } from '@storefront-ui/vue'
+import { useProduct, productGetters } from '@vue-storefront/commercetools'
+import { ref, onMounted } from '@vue/composition-api'
+
+export default Vue.extend({
+  name: 'ProductSlider',
+  components: {
+    SfCarousel,
+    SfProductCard,
+  },
+  props: {
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  setup({ items: { items} }: { items: { items: any[] } }) {
+    const list = ref([])
+    const loading = ref(true)
+    const getProducts = async () => {
+      await Promise.all(
+        items.map(async ({ id }) => {
+          const { search, products } = useProduct(id)
+          await search({ id })
+          list.value.push(products.value[0])
+        }),
+      )
+      loading.value = false
+    }
+    onMounted(async () => await getProducts())
+    return {
+      list,
+      loading,
+      productGetters,
+    }
+  },
+})
+</script>
+
