@@ -7,6 +7,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Make .env file
+        shell: bash
+        run: printf "
+          COMMERCETOOLS_CLIENT_SECRET=${{ secrets.COMMERCETOOLS_CLIENT_SECRET }}\n
+          COMMERCETOOLS_CLIENT_ID=${{ secrets.COMMERCETOOLS_CLIENT_ID }}\n
+          " > .env
       - name: Checkout code
         uses: actions/checkout@v1
       - name: Setup node
