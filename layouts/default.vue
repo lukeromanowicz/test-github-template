@@ -1,15 +1,14 @@
 <template>
   <div>
-    <RenderContent :content="styleGuide" />
     <LazyHydrate when-visible>
       <TopBar class="desktop-only" />
     </LazyHydrate>
     <LazyHydrate when-idle>
-      <RenderContent :content="header" />
+      <AppHeader />
     </LazyHydrate>
 
     <div id="layout">
-      <nuxt :key="$route.fullPath" />
+      <nuxt :key="$route.fullPath"/>
 
       <LazyHydrate when-visible>
         <BottomNavigation />
@@ -20,68 +19,39 @@
       <Notification />
     </div>
     <LazyHydrate when-visible>
-      <RenderContent :content="footer" />
+      <AppFooter />
     </LazyHydrate>
   </div>
 </template>
 
 <script>
-import BottomNavigation from '~/components/BottomNavigation.vue'
-import TopBar from '~/components/TopBar.vue'
-import CartSidebar from '~/components/CartSidebar.vue'
-import WishlistSidebar from '~/components/WishlistSidebar.vue'
-import LoginModal from '~/components/LoginModal.vue'
-import LazyHydrate from 'vue-lazy-hydration'
-import Notification from '~/components/Notification'
-
-import { useContent } from '@vue-storefront/storyblok'
-import { onSSR } from '@vue-storefront/core'
-import { onMounted, computed } from '@vue/composition-api'
+import AppHeader from '~/components/AppHeader.vue';
+import BottomNavigation from '~/components/BottomNavigation.vue';
+import AppFooter from '~/components/AppFooter.vue';
+import TopBar from '~/components/TopBar.vue';
+import CartSidebar from '~/components/CartSidebar.vue';
+import WishlistSidebar from '~/components/WishlistSidebar.vue';
+import LoginModal from '~/components/LoginModal.vue';
+import LazyHydrate from 'vue-lazy-hydration';
+import Notification from '~/components/Notification';
 
 export default {
   components: {
     LazyHydrate,
     TopBar,
+    AppHeader,
     BottomNavigation,
+    AppFooter,
     CartSidebar,
     WishlistSidebar,
     LoginModal,
-    Notification,
-  },
-  setup(props, context) {
-    const { search: searchStyleGuide, content: styleGuide } =
-      useContent('style-guide')
-    const { search: searchLayout, content: layout } = useContent('layout')
-
-    onSSR(async () => {
-      await searchStyleGuide({
-        custom: {
-          type: 'styleGuide',
-          field: 'title',
-          value: 'test',
-        },
-      })
-
-      await searchLayout({
-        custom: {
-          type: 'layout',
-          field: 'title',
-          value: 'cms-layout',
-        },
-      })
-    })
-
-    return {
-      styleGuide,
-      header: getLayoutPart('header'),
-      footer: getLayoutPart('footer'),
-    }
-  },
-}
+    Notification
+  }
+};
 </script>
 
 <style lang="scss">
-@import '~@storefront-ui/vue/styles';
+@import "~@storefront-ui/vue/styles";
 
 #layout {
   box-sizing: border-box;
@@ -99,9 +69,6 @@ export default {
 // Reset CSS
 html {
   width: auto;
-  @include for-mobile {
-    overflow-x: hidden;
-  }
 }
 body {
   overflow-x: hidden;
