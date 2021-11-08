@@ -5,13 +5,13 @@ module.exports = {
       extensions: existing => existing.concat('@vsf-enterprise/commercetools/extensions'),
       configuration: {
         api: {
-          uri: 'https://api.commercetools.com/vsf-ct-dev/graphql',
-          authHost: 'https://auth.sphere.io',
-          projectKey: 'vsf-ct-dev',
-          clientId: 'kuFT95wdTP4uH_hVOKjqfGEo',
-          clientSecret: 'tklIDic86mgWrFy0oBHRQQmwX7ZC5wIP',
+          uri: process.env.CT_API_URL,
+          authHost: process.env.CT_AUTH_URL,
+          projectKey: process.env.CT_PROJECT_KEY,
+          clientId: process.env.CT_CLIENT_ID,
+          clientSecret: process.env.CT_CLIENT_SECRET,
           scopes: [
-            'manage_project:vsf-ct-dev'
+            `manage_project:${process.env.CT_PROJECT_KEY}`
           ]
         },
         currency: 'USD',
@@ -31,11 +31,11 @@ module.exports = {
       configuration: {
         api: {
           authHost: 'https://auth.sphere.io',
-          projectKey: 'vsf-ct-dev',
-          clientId: 'kuFT95wdTP4uH_hVOKjqfGEo',
-          clientSecret: 'tklIDic86mgWrFy0oBHRQQmwX7ZC5wIP',
+          projectKey: process.env.CT_PROJECT_KEY,
+          clientId: process.env.CT_CLIENT_ID,
+          clientSecret: process.env.CT_CLIENT_SECRET,
           scopes: [
-            'manage_project:vsf-ct-dev'
+            `manage_project:${process.env.CT_PROJECT_KEY}`
           ]
         },
         faceting: {

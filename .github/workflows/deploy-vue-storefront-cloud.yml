@@ -10,8 +10,11 @@ jobs:
       - name: Make .env file
         shell: bash
         run: printf "
-          COMMERCETOOLS_CLIENT_SECRET=${{ secrets.COMMERCETOOLS_CLIENT_SECRET }}\n
-          COMMERCETOOLS_CLIENT_ID=${{ secrets.COMMERCETOOLS_CLIENT_ID }}\n
+          CT_PROJECT_KEY=${{ secrets.CT_PROJECT_KEY }}\n
+          CT_CLIENT_ID=${{ secrets.CT_CLIENT_ID }}\n
+          CT_CLIENT_SECRET=${{ secrets.CT_CLIENT_SECRET }}\n
+          CT_AUTH_URL=${{ secrets.CT_AUTH_URL }}\n
+          CT_API_URL=${{ secrets.CT_API_URL }}\n
           " > .env
       - name: Checkout code
         uses: actions/checkout@v1
