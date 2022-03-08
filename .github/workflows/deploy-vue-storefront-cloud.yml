@@ -9,7 +9,8 @@ jobs:
     steps:
       - name: Make .env file
         shell: bash
-        run: printf "
+        run: >
+          printf "
           CT_PROJECT_KEY=${{ secrets.CT_PROJECT_KEY }}\n
           CT_CLIENT_ID=${{ secrets.CT_CLIENT_ID }}\n
           CT_CLIENT_SECRET=${{ secrets.CT_CLIENT_SECRET }}\n
