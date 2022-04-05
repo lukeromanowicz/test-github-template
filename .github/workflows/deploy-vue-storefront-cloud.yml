@@ -1,0 +1,74 @@
+name: Deploy to Vue Storefront Cloud
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make .env file
+        shell: bash
+        run: >
+          printf "
+          CT_PROJECT_KEY=${{ secrets.CT_PROJECT_KEY }}\n
+          CT_CLIENT_ID=${{ secrets.CT_CLIENT_ID }}\n
+          CT_CLIENT_SECRET=${{ secrets.CT_CLIENT_SECRET }}\n
+          CT_AUTH_URL=${{ secrets.CT_AUTH_URL }}\n
+          CT_API_URL=${{ secrets.CT_API_URL }}\n
+          " > .env
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: Build and publish docker image
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: ${{ secrets.PROJECT_NAME }}-storefrontcloud-io/vue-storefront:${{ github.sha }}
+          registry: registry.vuestorefront.cloud
+          username: ${{ secrets.CLOUD_USERNAME }}
+          password: ${{ secrets.CLOUD_PASSWORD }}
+          dockerfile: .vuestorefrontcloud/docker/Dockerfile
+          buildoptions: "--compress"
+          buildargs: NPM_EMAIL,NPM_PASS,NPM_USER,NPM_REGISTRY
+        env:
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          NPM_PASS: ${{ secrets.NPM_PASS }}
+          NPM_USER: ${{ secrets.NPM_USER }}
+          NPM_REGISTRY: "https://registrynpm.storefrontcloud.io"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create GitHub deployment
+        id: deployment
+        with:
+          token: "${{ github.token }}"
+          target_url: https://${{ secrets.PROJECT_NAME }}.${{ secrets.CLOUD_REGION }}.gcp.storefrontcloud.io
+          environment: production
+          initial_status: in_progress
+      - name: Deploy on ${{ secrets.PROJECT_NAME }}.${{ secrets.CLOUD_REGION }}.gcp.storefrontcloud.io
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl --location --request PATCH 'https://api.platform.vuestorefront.io/cloud/instances/${{ secrets.PROJECT_NAME }}-${{ secrets.CLOUD_REGION }}-gcp-storefrontcloud-io/deploy' --header 'Content-Type: application/json' --data-raw '{ "cloudUserId": "${{ secrets.CLOUD_USERNAME }}", "cloudUserPassword": "${{ secrets.CLOUD_PASSWORD }}", "dockerImageHash": "${{ github.sha }}"}'
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: "${{ github.token }}"
+          target_url: https://${{ secrets.PROJECT_NAME }}.${{ secrets.CLOUD_REGION }}.gcp.storefrontcloud.io
+          state: "success"
+          description: Congratulations! The deploy is done.
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: "${{ github.token }}"
+          target_url: https://${{ secrets.PROJECT_NAME }}.${{ secrets.CLOUD_REGION }}.gcp.storefrontcloud.io
+          description: Unfortunately, the instance hasn't been updated.
+          state: "failure"
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
